@@ -26,4 +26,4 @@ roslaunch gap_detector gap_localization.launch rviz:=1
 ```
 
 
-The included costmap_2d folder is from [ros_navigation](https://github.com/ros-planning/navigation/tree/noetic-devel) package.
+The included costmap_2d folder is from [ros_navigation](https://github.com/ros-planning/navigation/tree/noetic-devel) package. The example_params.yaml file was adjusted.
