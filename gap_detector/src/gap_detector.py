@@ -32,7 +32,7 @@ class GapDetectingNode:
         self.high_val = 255  # 255
         print('initialized')
 
-        # USE ONLY FOR THRESHOLD DEBUGGING:
+        # UNCOMMENT FOR THRESHOLD DEBUGGING:
         # self.windowName = 'WINDOW'
         # cv2.namedWindow(self.windowName)
         # cv2.createTrackbar('low_hue', self.windowName, 0, 255, self.low_hue_update)
@@ -41,9 +41,8 @@ class GapDetectingNode:
         # cv2.createTrackbar('high_sat', self.windowName, 0, 255, self.high_sat_update)
         # cv2.createTrackbar('low_val', self.windowName, 0, 255, self.low_val_update)
         # cv2.createTrackbar('high_val', self.windowName, 0, 255, self.high_val_update)
-
         # self.image = None
-        # rate = rp.Rate(1)  # 10hz
+        # rate = rp.Rate(1)  # 1hz
         # while not rp.is_shutdown():
         #     self.check_hsv()
         #     rate.sleep()
@@ -54,12 +53,14 @@ class GapDetectingNode:
         low = (self.low_hue, self.low_sat, self.low_val)
         high = (self.high_hue, self.high_sat, self.high_val)
         self.last_camera_mask = cv2.inRange(hsv, low, high)
+
+        # UNCOMMENT FOR THRESHOLD DEBUGGING:
         # self.image = image
 
     def depth_callback(self, message):
         if self.picker % self.process_every:
             if self.last_camera_mask is not None:
-                depth_image = self.bridge.imgmsg_to_cv2(message, "16UC1")  # , "bgr8") ??
+                depth_image = self.bridge.imgmsg_to_cv2(message, "16UC1")
 
                 points = project(depth_image, self.last_camera_mask)
 
