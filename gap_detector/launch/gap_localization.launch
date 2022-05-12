@@ -16,7 +16,7 @@
 
 
     <!-- The static transformation between camera and robot in a format translation in X Y Z, rotation in X Y Z-->
-	<node pkg="tf2_ros" type="static_transform_publisher" name="camera_link" args="0 0 0.4 0 0.55 0 base_link camera_link" />
+	<node pkg="tf2_ros" type="static_transform_publisher" name="camera_link" args="0 0 0.6 0 0.55 0 base_link camera_link" />
 
     <!-- Mapping code -->
     <include file="$(find rtabmap_ros)/launch/rtabmap.launch">
