@@ -1,6 +1,17 @@
 <launch>
-	<node pkg="tf2_ros" type="static_transform_publisher" name="camera_link" args="0 0 0 0 0 0 1 base_link camera_link" />
+    <arg name="rosbag"            default="false"/>
+    <param if="$(arg rosbag)" name="use_sim_time" value="true"/>
 
+    <arg name="rviz" default="0"/>
+
+    <group if="$(arg rosbag)">
+        <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -d 5 /catkin_ws/kamil_robot_2022-05-12-09-24-18.bag"/>
+    </group>
+
+    <!-- The static transformation between camera and robot in a format translation in X Y Z, rotation in X Y Z-->
+	<node pkg="tf2_ros" type="static_transform_publisher" name="camera_link" args="0 0 0.5 0 0.35 0 base_link camera_link" />
+
+    <!-- Mapping code -->
     <include file="$(find rtabmap_ros)/launch/rtabmap.launch">
         <arg name="rtabmap_args" default="--delete_db_on_start"/>
         <arg name="approx_sync" default="false"/>
@@ -10,6 +21,13 @@
         <arg name="camera_info_topic" default="/camera/color/camera_info" />
     </include>
 
+    <!-- Code to detect gaps -->
     <node name="gap_detector" pkg="gap_detector" type="gap_detector.py" />
+
+    <!-- Code to build the 2D map out of pose and detected gaps -->
+    <include file="$(find costmap_2d)/launch/example.launch" />
+
+    <!-- rviz -->
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find gap_detector)/rviz/gap_detector.rviz" if="$(eval arg('rviz') != 0)" />
 
 </launch>

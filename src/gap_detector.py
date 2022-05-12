@@ -70,7 +70,7 @@ class GapDetectingNode:
 
                 header = message.header
                 pc2_message = point_cloud2.create_cloud(header, fields, points)
-                rp.sleep(0.1)  # delay messages so they arrive after rtabmap
+                # rp.sleep(0.1)  # delay messages so they arrive after rtabmap
                 self.cloud_publisher.publish(pc2_message)
         self.picker += 1
 
