@@ -21,7 +21,7 @@ class GapDetectingNode:
 
         self.last_camera_mask = None
         self.picker = 0
-        self.process_every = 4  # 2 means every 2nd depth frame is processed, 3 means every 3rd etc.
+        self.process_every = 2  # 2 means every 2nd depth frame is processed, 3 means every 3rd etc.
 
         # Tuned for green pieces of paper:
         self.low_hue = 50  # 50
@@ -58,7 +58,7 @@ class GapDetectingNode:
         # self.image = image
 
     def depth_callback(self, message):
-        if self.picker % self.process_every:
+        if self.picker % self.process_every == 0:
             if self.last_camera_mask is not None:
                 depth_image = self.bridge.imgmsg_to_cv2(message, "16UC1")
 
