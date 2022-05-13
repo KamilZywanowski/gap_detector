@@ -5,7 +5,7 @@
     <arg name="rviz" default="0"/>
 
     <group if="$(arg rosbag)">
-        <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -d 5 /root/epfl_ws/robot.bag"/>
+        <node pkg="rosbag" type="play" name="player" output="screen" args="--clock -d 5 /catkin_ws/robot_2022-05-13-08-13-47.bag"/>
     </group>
 
     <group unless="$(arg rosbag)">
@@ -29,7 +29,7 @@
     </include>
 
     <!-- Code to detect gaps -->
-    <node name="gap_detector" pkg="gap_detector" type="gap_detector.py" />
+    <node name="gap_detector" pkg="gap_detector" type="gap_detector.py" output="screen"/>
 
     <!-- Code to build the 2D map out of pose and detected gaps -->
     <include file="$(find costmap_2d)/launch/example.launch" />

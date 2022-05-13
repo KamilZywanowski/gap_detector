@@ -6,6 +6,7 @@ from numba import njit
 from sensor_msgs import point_cloud2
 from sensor_msgs.msg import Image, PointCloud2, PointField
 
+import message_filters
 
 class GapDetectingNode:
     def __init__(self):
@@ -13,9 +14,11 @@ class GapDetectingNode:
         self.cloud_publisher = rp.Publisher("/gap_detector/points", PointCloud2, queue_size=1)
 
         # subscribers
-        self.camera_subscriber = rp.Subscriber('/camera/color/image_raw', Image, self.camera_callback, queue_size=1)
-        self.depth_subscriber = rp.Subscriber('/camera/aligned_depth_to_color/image_raw', Image, self.depth_callback,
-                                              queue_size=1)
+        camera_subscriber = message_filters.Subscriber('/camera/color/image_raw', Image)
+        depth_subscriber = message_filters.Subscriber('/camera/aligned_depth_to_color/image_raw', Image)
+
+        ts = message_filters.ApproximateTimeSynchronizer([camera_subscriber, depth_subscriber], 2, 0.1)
+        ts.registerCallback(self.joint_callback)
 
         self.bridge = CvBridge()
 
@@ -47,8 +50,8 @@ class GapDetectingNode:
         #     self.check_hsv()
         #     rate.sleep()
 
-    def camera_callback(self, message):
-        image = self.bridge.imgmsg_to_cv2(message)
+    def joint_callback(self, rgb_message, depth_message):
+        image = self.bridge.imgmsg_to_cv2(rgb_message)
         hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
         low = (self.low_hue, self.low_sat, self.low_val)
         high = (self.high_hue, self.high_sat, self.high_val)
@@ -57,21 +60,19 @@ class GapDetectingNode:
         # UNCOMMENT FOR THRESHOLD DEBUGGING:
         # self.image = image
 
-    def depth_callback(self, message):
         if self.picker % self.process_every == 0:
             if self.last_camera_mask is not None:
-                depth_image = self.bridge.imgmsg_to_cv2(message, "16UC1")
+                depth_image = self.bridge.imgmsg_to_cv2(depth_message, "16UC1")
 
                 points = project(depth_image, self.last_camera_mask)
 
                 fields = [PointField('x', 0, PointField.FLOAT32, 1),
-                          PointField('y', 4, PointField.FLOAT32, 1),
-                          PointField('z', 8, PointField.FLOAT32, 1),
-                          ]
+                        PointField('y', 4, PointField.FLOAT32, 1),
+                        PointField('z', 8, PointField.FLOAT32, 1),
+                        ]
 
-                header = message.header
+                header = rgb_message.header
                 pc2_message = point_cloud2.create_cloud(header, fields, points)
-                # rp.sleep(0.1)  # delay messages so they arrive after rtabmap
                 self.cloud_publisher.publish(pc2_message)
         self.picker += 1
 
